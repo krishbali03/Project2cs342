@@ -1,0 +1,16 @@
+.root * {
+    -fx-font-family: "Apple Garamond Light";
+}
+
+.label, .button, .text-field, .text {
+    -fx-font-family: "Apple Garamond Light";
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+.subtitle {
+    -fx-font-family: "Apple Garamond";
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
