@@ -21,7 +21,7 @@ public class GeocodingClient {
             String url = "https://nominatim.openstreetmap.org/search"
                     + "?q=" + encoded
                     + "&format=json"
-                    + "&limit=5"
+                    + "&limit=6"
                     + "&countrycodes=us"
                     + "&featuretype=city";
 
@@ -44,10 +44,19 @@ public class GeocodingClient {
         public String lat;
         public String lon;
 
+        public String getShortName() {
+            if (display_name == null) return "";
+            String[] parts = display_name.split(",");
+            String city = parts[0].trim();
+            String state = parts.length >= 3 ? parts[2].trim() : "";
+            return state.isEmpty() ? city : city + ", " + state;
+        }
+
         public double getLat() { return Double.parseDouble(lat); }
         public double getLon() { return Double.parseDouble(lon); }
-
         @Override
         public String toString() { return display_name; }
+
+
     }
 }

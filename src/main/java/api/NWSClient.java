@@ -13,25 +13,28 @@ import java.util.ArrayList;
 
 public class NWSClient {
 
+    private static final HttpClient client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.ALWAYS)
+            .build();
+
     public static WeatherResult getWeather(double lat, double lon) {
         PointsProperties points = getPoints(lat, lon);
         if (points == null) return null;
-
         ArrayList<Period> forecast = getForecast(points.forecast);
         ArrayList<Period> hourly = getForecast(points.forecastHourly);
-
         return new WeatherResult(forecast, hourly);
     }
 
     public static PointsProperties getPoints(double lat, double lon) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.weather.gov/points/" + lat + "," + lon))
-                .header("User-Agent", "WeatherApp/1.0")
+                .header("User-Agent", "WeatherApp/1.0 CS342Project")
+                .header("Accept", "application/geo+json")
                 .build();
 
         HttpResponse<String> response = null;
         try {
-            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -52,7 +55,7 @@ public class NWSClient {
 
         HttpResponse<String> response = null;
         try {
-            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             e.printStackTrace();
         }

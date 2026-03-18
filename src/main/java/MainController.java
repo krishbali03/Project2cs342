@@ -13,6 +13,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import weather.Period;
 
+import java.util.Objects;
+
 public class MainController {
 
     @FXML private Canvas weatherCanvas;
@@ -52,6 +54,14 @@ public class MainController {
         currentLat = lat;
         currentLon = lon;
     }
+    public static void resetCache(WeatherResult result, double lat, double lon, String location){
+        cachedWeather = result;
+        cachedLat = lat;
+        cachedLon = lon;
+        cachedLocation = location;
+        cachedPeriodIndex = 0;
+        cachedHourIndex = 0;
+    }
     private boolean isOverSign(double x, double y) {
         return x >= 805 && x <= 1206 && y >= 166 && y <= 482;
     }
@@ -63,7 +73,14 @@ public class MainController {
     }
     @FXML
     public void initialize() {
-        bgImage = new Image(getClass().getResourceAsStream("/sprites/background.png"));
+        bgImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/background.png")));
+
+        currentWeather = cachedWeather;
+        currentLat = cachedLat;
+        currentLon = cachedLon;
+        currentLocationName = cachedLocation;
+        selectedPeriodIndex = cachedPeriodIndex;
+        selectedHourIndex = cachedHourIndex;
 
         weatherCanvas.setOnMouseMoved(e -> {
             if (isOverSign(e.getX(), e.getY())) {

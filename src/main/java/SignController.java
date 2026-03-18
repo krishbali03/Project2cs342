@@ -1,16 +1,13 @@
 import api.GeocodingClient;
 import api.NWSClient;
 import api.WeatherResult;
+import com.sun.tools.javac.Main;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import weather.Period;
@@ -53,6 +50,8 @@ public class SignController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM d");
     private static final SimpleDateFormat hourFormat = new SimpleDateFormat("h:mm a");
 
+    final javafx.animation.PauseTransition pause = new  javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
+
     @FXML
     public void initialize() {
         datePrev.setOnMouseClicked(e -> { SoundManager.playClick(); changeDate(-1); });
@@ -62,8 +61,13 @@ public class SignController {
         backButton.setOnMouseClicked(e -> { SoundManager.playClick(); goBack(); });
 
         locationSearch.textProperty().addListener((obs, old, val) -> {
-            if (val.length() > 2) searchCity(val);
-            else suggestionMenu.hide();
+            if (val != null && val.trim().length() > 2){
+                pause.setOnFinished(e -> searchCity(val.trim()));
+                pause.playFromStart();
+            }
+            else{
+                suggestionMenu.getItems().clear();
+            }
         });
     }
 
@@ -133,31 +137,30 @@ public class SignController {
             List<GeocodingClient.GeoResult> results = GeocodingClient.search(query);
             Platform.runLater(() -> {
                 suggestionMenu.getItems().clear();
-                for (GeocodingClient.GeoResult r : results) {
-                    MenuItem item = new MenuItem(r.display_name);
+                suggestionMenu.hide();
+                if (results == null || results.isEmpty()) return;
+                List<GeocodingClient.GeoResult> top6 = results.stream().limit(6).collect(java.util.stream.Collectors.toList());
+                for (GeocodingClient.GeoResult r : top6) {
+                    MenuItem item = new MenuItem(r.getShortName());
                     item.setOnAction(e -> selectCity(r));
                     suggestionMenu.getItems().add(item);
                 }
-                if (!results.isEmpty()) {
-                    if (!suggestionMenu.isShowing()) {
-                        suggestionMenu.show(locationSearch, javafx.geometry.Side.BOTTOM, 0, 0);
-                    }
-                } else {
-                    suggestionMenu.hide();
+                if (locationSearch.getText() == null || locationSearch.getScene().getWindow() != null) {
+                    suggestionMenu.show(locationSearch, javafx.geometry.Side.BOTTOM, 0, 0);
                 }
+
             });
         }).start();
     }
 
     private void selectCity(GeocodingClient.GeoResult city) {
-        locationSearch.setText(city.display_name);
-        currentLocationName = city.display_name;
+        currentLocationName = city.getShortName();
+        locationSearch.setText(currentLocationName);
         suggestionMenu.hide();
         subtitleLabel.setText("Loading...");
-        System.out.println("Lat: " + city.getLat() + " Lon: " + city.getLon());
+
         new Thread(() -> {
             WeatherResult result = NWSClient.getWeather(city.getLat(), city.getLon());
-            System.out.println("Result null: " + (result == null));
             Platform.runLater(() -> {
                 if (result != null) {
                     currentWeather = result;
@@ -165,8 +168,9 @@ public class SignController {
                     currentLon = city.getLon();
                     dateIndex = 0;
                     hourIndex = 0;
+                    MainController.resetCache(result, city.getLat(), city.getLon(), currentLocationName);
                     updateDisplay();
-                    subtitleLabel.setText("Location updated.");
+                    subtitleLabel.setText("");
                 } else {
                     subtitleLabel.setText("bro are you in ukatan?.");
                 }
@@ -183,13 +187,12 @@ public class SignController {
         fade.setToValue(0.0);
         fade.setOnFinished(e -> {
             try {
+                MainController.resetCache(currentWeather, currentLat, currentLon, currentLocationName);
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
                 Parent newRoot = loader.load();
                 MainController controller = loader.getController();
-                controller.setWeatherData(currentWeather, currentLat, currentLon);
                 controller.setSelectedPeriod(dateIndex * 2);
                 controller.setSelectedHour(hourIndex);
-                controller.setLocationName(currentLocationName);
                 controller.refresh();
                 Stage stage = (Stage) backButton.getScene().getWindow();
                 stage.setScene(new Scene(newRoot, 1278, 782));
