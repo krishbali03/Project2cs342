@@ -1,205 +1,175 @@
 import api.NWSClient;
 import api.WeatherResult;
+import api.IpApiClient;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
 import weather.Period;
 
 public class MainController {
 
-    @FXML private Canvas weatherCanvas;
-    @FXML private Label subtitleLabel;
-    @FXML private Label examineLabel;
-    @FXML private StackPane root;
-    @FXML private Button testButton;
+    // 1. UI Elements
+    @FXML private VBox root;
+    @FXML private TextField searchBar;
+    @FXML private Button currentLocation;
+    @FXML private Button search;
+    @FXML private Label cityName;
+    @FXML private HBox hourlyHBox;
+    @FXML private ImageView mainWeatherIcon;
+    @FXML private HBox dailyHBox;
 
-    private static WeatherResult cachedWeather = null;
-    private static double cachedLat = 41.8781;
-    private static double cachedLon = -87.6298;
-    private static String cachedLocation = "Chicago, IL";
-    private static int cachedPeriodIndex = 0;
-    private static int cachedHourIndex = 0;
+    // 2. Data State
     private WeatherResult currentWeather;
     private double currentLat = 41.8781;
     private double currentLon = -87.6298;
-    private int selectedPeriodIndex = 0;
-    private int selectedHourIndex = 0;
     private String currentLocationName = "Chicago, IL";
-    private Image bgImage;
 
-    public void setSelectedPeriod(int index) {
-        selectedPeriodIndex = index;
-        cachedPeriodIndex = index;
-    }
-    public void setSelectedHour(int hour) {
-        selectedHourIndex = hour;
-        cachedHourIndex = hour;
-    }
-    public void setLocationName(String name) {
-        currentLocationName = name;
-        cachedLocation = name;
-    }
-    public void setWeatherData(WeatherResult result, double lat, double lon) {
-        currentWeather = result;
-        currentLat = lat;
-        currentLon = lon;
-    }
-    private boolean isOverSign(double x, double y) {
-        return x >= 805 && x <= 1206 && y >= 166 && y <= 482;
-    }
-
-    private void drawSignHighlight() {
-        javafx.scene.canvas.GraphicsContext gc = weatherCanvas.getGraphicsContext2D();
-        gc.setFill(javafx.scene.paint.Color.rgb(255, 255, 255, 0.15));
-        gc.fillRect(805, 166, 401, 316);
-    }
     @FXML
     public void initialize() {
-        bgImage = new Image(getClass().getResourceAsStream("/sprites/background.png"));
+        // Set up the button click events
+        search.setOnAction(e -> handleSearch());
 
-        weatherCanvas.setOnMouseMoved(e -> {
-            if (isOverSign(e.getX(), e.getY())) {
-                examineLabel.setText("Examine.");
-                redrawCanvas();
-                drawSignHighlight();
-            } else {
-                examineLabel.setText("");
-                redrawCanvas();
-            }
-        });
-        weatherCanvas.setOnMouseClicked(e -> {
-            if (isOverSign(e.getX(), e.getY())) {
-                SoundManager.playClick();
-                switchToSignScene();
-            }
-        });
+//        currentLocation.setOnAction(e -> {
+//            loadCurrentLocation();
+//        });
 
-        loadWeather(currentLat, currentLon);
+        // Initialize the City Name label style so it's visible on the dark background
+        cityName.setStyle("-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;");
+
+        // Automatically fetch your IP location as soon as the app turns on
+        loadCurrentLocation();
     }
 
-    private void loadWeather(double lat, double lon) {
+    private void handleSearch() {
+        String query = searchBar.getText();
+        if (query == null || query.isEmpty()) return;
+
+        System.out.println("User searched for: " + query);
+        cityName.setText("Loading " + query + "...");
+
+        // Note: You can plug in your GeocodingClient.search(query) here later
+    }
+
+    private void loadCurrentLocation() {
+        cityName.setText("Locating...");
+
         new Thread(() -> {
-            WeatherResult result = NWSClient.getWeather(lat, lon);
+            // Grab our array: [status, city, state, lat, lon]
+            String[] locData = IpApiClient.getLocation();
+
             Platform.runLater(() -> {
-                if (result == null) {
-                    subtitleLabel.setText("Could not retrieve weather data.");
-                    return;
+                if (locData != null) {
+                    // Update our variables using the array slots
+                    currentLocationName = locData[1] + ", " + locData[2]; // City, State
+                    currentLat = Double.parseDouble(locData[3]);          // Lat
+                    currentLon = Double.parseDouble(locData[4]);          // Lon
+                } else {
+                    System.out.println("Location failed, defaulting to previous coordinates.");
                 }
-                currentWeather = result;
-                cachedWeather = result;
-                redrawCanvas();
-                subtitleLabel.setText(getAtmosphericSubtitle(result.forecast.get(0).shortForecast));
+
+                // Fetch the weather using the new coordinates
+                loadWeather(currentLat, currentLon, currentLocationName);
             });
         }).start();
     }
 
-    private void redrawCanvas() {
-        javafx.scene.canvas.GraphicsContext gc = weatherCanvas.getGraphicsContext2D();
-        gc.drawImage(bgImage, 0, 0, 1278, 782);
-        drawSignText(currentWeather);
-    }
+    private void loadWeather(double lat, double lon, String name) {
+        new Thread(() -> {
+            // Fetch data in the background so the UI doesn't freeze
+            WeatherResult result = NWSClient.getWeather(lat, lon);
 
-    public void refresh() {
-        Platform.runLater(() -> {
-            redrawCanvas();
-            if (currentWeather != null) {
-                subtitleLabel.setText(getAtmosphericSubtitle(
-                        currentWeather.forecast.get(0).shortForecast));
-            }
-        });
-    }
-
-    private void drawSignText(WeatherResult result) {
-        if (result == null) return;
-
-        Period selected = null;
-
-        try {
-            if (result.hourly != null && !result.hourly.isEmpty()) {
-                Period dayPeriod = result.forecast.get(Math.min(selectedPeriodIndex, result.forecast.size() - 1));
-                String targetDate = new java.text.SimpleDateFormat("EEE MMM d").format(dayPeriod.startTime);
-                int count = 0;
-                for (Period p : result.hourly) {
-                    String periodDate = new java.text.SimpleDateFormat("EEE MMM d").format(p.startTime);
-                    if (periodDate.equals(targetDate)) {
-                        if (count == selectedHourIndex) { selected = p; break; }
-                        count++;
-                    }
+            Platform.runLater(() -> {
+                if (result != null) {
+                    currentWeather = result;
+                    currentLocationName = name;
+                    updateDisplay();
+                } else {
+                    cityName.setText("Failed to load weather.");
                 }
+            });
+        }).start();
+    }
+
+    private void updateDisplay() {
+        // 1. Update the main city label
+        cityName.setText(currentLocationName);
+
+        // 2. Clear the hourly scroll box and fill it with new data
+        hourlyHBox.getChildren().clear();
+
+        // Populate Hourly Data
+        if (currentWeather != null && currentWeather.hourly != null) {
+            for (int i = 0; i < Math.min(12, currentWeather.hourly.size()); i++) {
+                Period hour = currentWeather.hourly.get(i);
+
+                // Create the individual card background
+                VBox hourCard = new VBox(8);
+                hourCard.setStyle("-fx-background-color: #1E1E27; -fx-padding: 10; -fx-background-radius: 8; -fx-alignment: center; -fx-min-width: 60; -fx-pref-height: 75;");
+
+                // Format Time Label (e.g., "3 PM")
+                String timeStr = new java.text.SimpleDateFormat("h a").format(hour.startTime);
+                Label timeLabel = new Label(timeStr);
+                timeLabel.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 14px;");
+
+                // Format Temp Label (e.g., "72°")
+                Label tempLabel = new Label(hour.temperature + "°");
+                tempLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
+
+                // Add both labels to the card, and the card to the scroll row
+                hourCard.getChildren().addAll(timeLabel, tempLabel);
+                hourlyHBox.getChildren().add(hourCard);
             }
-            if (selected == null) {
-                selected = result.forecast.get(Math.min(selectedPeriodIndex, result.forecast.size() - 1));
-            }
-        } catch (Exception e) {
-            selected = result.forecast.get(0);
         }
 
-        javafx.scene.canvas.GraphicsContext gc = weatherCanvas.getGraphicsContext2D();
-        gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
-        gc.setFill(javafx.scene.paint.Color.WHITE);
+        // --- 3. Populate 7-Day Forecast Data ---
+        dailyHBox.getChildren().clear();
 
-        javafx.scene.text.Font light38 = javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fonts/AppleGaramond-Light.ttf"), 38);
-        javafx.scene.text.Font light42 = javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fonts/AppleGaramond-Light.ttf"), 42);
-        javafx.scene.text.Font light24 = javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fonts/AppleGaramond-Light.ttf"), 24);
-        javafx.scene.text.Font light52 = javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fonts/AppleGaramond-Light.ttf"), 52);
+        if (currentWeather != null && currentWeather.forecast != null) {
+            for (int i = 0; i < currentWeather.forecast.size(); i++) {
+                Period currentPeriod = currentWeather.forecast.get(i);
 
-        gc.setFont(light38);
-        gc.fillText("Welcome to", 1005, 245);
+                // We only want to create a card for the Daytime periods
+                if (currentPeriod.isDaytime) {
 
-        gc.setFont(light42);
-        gc.fillText(currentLocationName, 1005, 295);
+                    // Create the Daily Card
+                    VBox dayCard = new VBox(5);
+                    dayCard.setStyle("-fx-background-color: #000000; -fx-background-radius: 10; -fx-alignment: center; -fx-min-width: 120; -fx-pref-height: 190;");
 
-        gc.setFont(light24);
-        gc.fillText(new java.text.SimpleDateFormat("EEEE, MMMM d yyyy").format(selected.startTime), 1005, 355);
+                    // 1. Day Name (Convert "Monday" to "Mon")
+                    String dayName = currentPeriod.name;
+                    if (dayName.length() > 3 && !dayName.equals("Today")) {
+                        dayName = dayName.substring(0, 3);
+                    }
+                    Label dayLabel = new Label(dayName);
+                    dayLabel.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 16px;");
 
-        gc.setFont(light24);
-        gc.fillText(new java.text.SimpleDateFormat("h:mm a").format(selected.startTime), 1005, 390);
+                    // 2. Weather Icon (Temporary magnifying glass)
+                    ImageView icon = new ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/searchIcon.png")));
+                    icon.setFitHeight(48);
+                    icon.setFitWidth(48);
 
-        gc.setFont(light52);
-        gc.fillText(selected.temperature + "°F", 1005, 462);
-    }
+                    // 3. High / Low Temperature
+                    String highLow = currentPeriod.temperature + "°";
 
-    private void switchToSignScene() {
-        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(
-                javafx.util.Duration.millis(500), root
-        );
-        fade.setFromValue(1.0);
-        fade.setToValue(0.0);
-        fade.setOnFinished(e -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/sign.fxml"));
-                Parent newRoot = loader.load();
-                SignController controller = loader.getController();
-                controller.setWeatherData(currentWeather, currentLat, currentLon);
-                controller.setDateIndex(selectedPeriodIndex / 2);
-                controller.setHourIndex(selectedHourIndex);
-                controller.setLocationName(currentLocationName);
-                controller.refreshDisplay();
-                Stage stage = (Stage) weatherCanvas.getScene().getWindow();
-                stage.setScene(new Scene(newRoot, 1278, 782));
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                    // Check if there is a "Night" period right after this one to get the Low Temp
+                    if (i + 1 < currentWeather.forecast.size()) {
+                        Period nightPeriod = currentWeather.forecast.get(i + 1);
+                        highLow += " / " + nightPeriod.temperature + "°";
+                    }
+
+                    Label tempLabel = new Label(highLow);
+                    tempLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
+
+                    // Add everything to the card, and add the card to the scroll box
+                    dayCard.getChildren().addAll(dayLabel, icon, tempLabel);
+                    dailyHBox.getChildren().add(dayCard);
+                }
             }
-        });
-        SoundManager.playClick();
-        fade.play();
-    }
-
-    private String getAtmosphericSubtitle(String shortForecast) {
-        String f = shortForecast.toLowerCase();
-        if (f.contains("thunder") || f.contains("storm")) return "the thunder feels like its bashing my brain";
-        if (f.contains("snow")) return "snow? so pure so white";
-        if (f.contains("fog")) return "i can't see anything...";
-        if (f.contains("rain")) return "its been pouring for hours";
-        if (f.contains("cloud")) return "the sun wants to hide today";
-        return "pretty clear";
+        }
     }
 }

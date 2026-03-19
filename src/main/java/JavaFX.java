@@ -15,13 +15,21 @@ public class JavaFX extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		Font.loadFont(getClass().getResourceAsStream("/fonts/AppleGaramond-Light.ttf"), 14);
 		SoundManager.load();
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
-		Parent root = loader.load();
-		Scene scene = new Scene(root, 1278, 782);
-		scene.getStylesheets().add(getClass().getResource("/global.css").toExternalForm());
-		primaryStage.setTitle("Weather");
-		primaryStage.setResizable(false);
-		primaryStage.setScene(scene);
-		primaryStage.show();
+
+		try {
+			Parent root = FXMLLoader.load(getClass().getResource("/FXML/main.fxml"));
+
+			Scene main = new Scene(root, 1280, 720);
+
+			main.getStylesheets().add(getClass().getResource("/CSS/global.css").toExternalForm());
+			primaryStage.setTitle("Weather App");
+			primaryStage.setResizable(false);
+			primaryStage.setScene(main);
+			primaryStage.show();
+
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 }

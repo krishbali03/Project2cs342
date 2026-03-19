@@ -183,9 +183,9 @@ public class SignController {
         fade.setToValue(0.0);
         fade.setOnFinished(e -> {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/main.fxml"));
                 Parent newRoot = loader.load();
-                MainController controller = loader.getController();
+                oldMainController controller = loader.getController();
                 controller.setWeatherData(currentWeather, currentLat, currentLon);
                 controller.setSelectedPeriod(dateIndex * 2);
                 controller.setSelectedHour(hourIndex);
