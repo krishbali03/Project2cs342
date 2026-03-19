@@ -1,0 +1,57 @@
+.root * {
+    -fx-font-family: "Apple Garamond Light";
+}
+
+.label, .button, .text-field, .text {
+    -fx-font-family: "Apple Garamond Light";
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+.subtitle {
+    -fx-font-family: "Apple Garamond";
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/*ScrollPane transparent to get rid of white bar */
+.scroll-pane, .scroll-pane .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+/* invisible scrollbar track */
+.scroll-bar:horizontal,
+.scroll-bar:horizontal .track,
+.scroll-bar:horizontal .track-background {
+    -fx-background-color: transparent;
+}
+
+/*modern scroll*/
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #555555;
+    -fx-background-radius: 10px;
+}
+
+/* hover interaction */
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #777777;
+}
+
+/* clean up, remove oldschool scroll wheel buttons */
+.scroll-bar:horizontal .increment-button,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* removes scroll arrows */
+.scroll-bar:horizontal .increment-arrow,
+.scroll-bar:horizontal .decrement-arrow {
+    -fx-background-color: transparent;
+    -fx-shape: " ";
+    -fx-padding: 0;
+}

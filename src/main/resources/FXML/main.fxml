@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+
+
+<VBox fx:id="root" prefHeight="720" prefWidth="1280"
+           xmlns="http://javafx.com/javafx/17.0.12"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="MainController" style="-fx-background-color: #1E1E27;" spacing="20">
+    <padding>
+        <Insets top="30" right="150" left="150" bottom="10"/>
+    </padding>
+
+
+    <VBox spacing="30">
+    </VBox>
+
+    <HBox alignment="CENTER">
+        <TextField
+            fx:id = "searchBar"
+            prefWidth="600" prefHeight="50"
+            promptText= "Enter a city (Ex: Chicago)"
+            style = "-fx-background-color: blue"
+        />
+        <Button fx:id="currentLocation" prefHeight="40" prefWidth="40" style = "-fx-background-color: green">
+            <graphic>
+                <ImageView fitHeight="24" fitWidth="24">
+                    <Image url="@/images/currentLocationIcon.png"/>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Button fx:id="search" prefHeight="40" prefWidth="40" style = "-fx-background-color: green">
+            <graphic>
+                <ImageView fitHeight="24" fitWidth="24">
+                    <Image url="@/images/searchIcon.png"/>
+                </ImageView>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <HBox spacing="10" prefHeight="350" style = "-fx-background-radius: 10">
+
+        <VBox spacing="35" prefWidth="440" style="-fx-background-color: #000000; -fx-background-radius: 10;">
+
+            <padding>
+                <Insets top="10" right="10" bottom="0" left="10"/>
+            </padding>
+
+            <HBox>
+                <Label fx:id="cityName" alignment="TOP_LEFT"/>
+
+                <Label text="test" alignment="TOP_RIGHT"/>
+            </HBox>
+
+            <HBox>
+                <ImageView fx:id="mainWeatherIcon" fitHeight="96" fitWidth="96" preserveRatio="true">
+                    <Image url="@/images/searchIcon.png"/>
+                </ImageView>
+                <VBox>
+                    <Label text="test"/>
+                    <Label text="test"/>
+                    <Label text="test"/>
+                </VBox>
+            </HBox>
+
+
+            <VBox spacing="10">
+            <Label text="Hourly:" />
+
+
+            <ScrollPane fitToHeight= "true" vbarPolicy="NEVER" hbarPolicy="ALWAYS" prefHeight="100" style="-fx-background-color: #000000" >
+                <HBox fx:id="hourlyHBox" spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #000000"/>
+            </ScrollPane>
+            </VBox>
+
+        </VBox>
+
+        <StackPane HBox.hgrow="ALWAYS" style="-fx-background-color: #000000; -fx-background-radius: 10;">
+            <Label text="Radar Map Feed" style="-fx-text-fill: #555555; -fx-font-size: 24px;" />
+
+            <Canvas fx:id="radarCanvas" width="450" height="350" />
+        </StackPane>
+
+    </HBox>
+    <VBox spacing="50">
+    </VBox>
+
+    <HBox spacing="15">
+
+        <VBox spacing="10" VBox.vgrow="ALWAYS">
+
+            <Label text="7-Day Forecast:" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <HBox fx:id="dailyHBox" spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: transparent;" prefHeight="150">
+
+                <VBox prefWidth="120" prefHeight="150" style="-fx-background-color: #000000; -fx-background-radius: 10; -fx-alignment: center;">
+                    <Label text="Mon" style="-fx-text-fill: #b3b3b3; -fx-font-size: 16px;"/>
+                    <ImageView fitHeight="48" fitWidth="48">
+                        <Image url="@/images/searchIcon.png"/>
+                    </ImageView>
+                    <Label text="55° / 40°" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+
+
+
+    </HBox>
+
+</VBox>
