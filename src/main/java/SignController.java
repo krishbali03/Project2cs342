@@ -46,10 +46,6 @@ public class SignController {
         this.hourIndex = index;
     }
     private ContextMenu suggestionMenu = new ContextMenu();
-
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM d");
-    private static final SimpleDateFormat hourFormat = new SimpleDateFormat("h:mm a");
-
     final javafx.animation.PauseTransition pause = new  javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
 
     @FXML
