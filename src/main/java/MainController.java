@@ -1,175 +1,321 @@
 import api.NWSClient;
 import api.WeatherResult;
 import api.IpApiClient;
+import api.GeocodingClient;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.image.ImageView;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import weather.Period;
+import java.io.IOException;
+import java.util.List;
 
 public class MainController {
 
-    // 1. UI Elements
+    // FXML Variables
     @FXML private VBox root;
-    @FXML private TextField searchBar;
-    @FXML private Button currentLocation;
-    @FXML private Button search;
-    @FXML private Label cityName;
+    @FXML private TextField Search;
+    @FXML private Button SearchGO;
+    @FXML private Button GrabCurrentLocation;
+    @FXML private Text Location;
+    @FXML private Text CurrentTemp;
+    @FXML private ImageView CurrentIcon;
+    @FXML private Button MultidayScene;
     @FXML private HBox hourlyHBox;
-    @FXML private ImageView mainWeatherIcon;
-    @FXML private HBox dailyHBox;
 
-    // 2. Data State
+
+    @FXML private Text DailyHIgh;
+    @FXML private Text DailyLow;
+    @FXML private Text CurrentWindSpeed;
+    @FXML private Text CurrentWindDirection;
+    @FXML private Text ChanceOfPercipitation;
+
+    // State Variables
     private WeatherResult currentWeather;
     private double currentLat = 41.8781;
     private double currentLon = -87.6298;
     private String currentLocationName = "Chicago, IL";
+    private boolean dataPreloaded = false;
 
     @FXML
     public void initialize() {
-        // Set up the button click events
-        search.setOnAction(e -> handleSearch());
+        if (!dataPreloaded) {
+            loadCurrentLocation();
+        }
+        System.out.println("[APP START] Initializing Main Controller...");
 
-//        currentLocation.setOnAction(e -> {
-//            loadCurrentLocation();
-//        });
+        if (Search != null) Search.setOnAction(e -> handleSearch());
+        if (SearchGO != null) SearchGO.setOnAction(e -> handleSearch());
+        if (GrabCurrentLocation != null) GrabCurrentLocation.setOnAction(e -> loadCurrentLocation());
+        if (MultidayScene != null) MultidayScene.setOnAction(e -> swapToMultiView(e));
 
-        // Initialize the City Name label style so it's visible on the dark background
-        cityName.setStyle("-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;");
-
-        // Automatically fetch your IP location as soon as the app turns on
-        loadCurrentLocation();
+        if (dataPreloaded) {
+            updateDisplay();
+        }
     }
 
+    public void initData(WeatherResult data, String locationName) {
+        this.currentWeather = data;
+        this.currentLocationName = locationName;
+        this.dataPreloaded = true; //does not work, tried to keep it saved but couldnt find the bug
+    }
+
+    @FXML
     private void handleSearch() {
-        String query = searchBar.getText();
-        if (query == null || query.isEmpty()) return;
+        String query = Search.getText();
+        if (query == null || query.trim().isEmpty()) return;
 
-        System.out.println("User searched for: " + query);
-        cityName.setText("Loading " + query + "...");
+        System.out.println("\n [SEARCH INITIATED]");
+        System.out.println("1. User Typed: " + query);
+        if (Location != null) Location.setText("Searching atlas...");
 
-        // Note: You can plug in your GeocodingClient.search(query) here later
+        new Thread(() -> {
+            System.out.println("2. Requesting coordinates from Geocoding API...");
+            List<GeocodingClient.GeoResult> results = GeocodingClient.search(query);
+
+            Platform.runLater(() -> {
+                if (results != null && !results.isEmpty()) {
+                    GeocodingClient.GeoResult geo = results.get(0);
+                    currentLocationName = geo.display_name;
+                    System.out.println("3. [All Good] Found coordinates for: " + currentLocationName);
+                    System.out.println("   => PARSED SEARCH LAT: " + geo.getLat());
+                    System.out.println("   => PARSED SEARCH LON: " + geo.getLon());
+
+                    loadWeather(geo.getLat(), geo.getLon(), currentLocationName);
+                    Search.clear();
+                } else {
+                    System.out.println("3. [No Bueno] Geocoding could not find that city.");
+                    if (Location != null) Location.setText("That place does not exist.");
+                }
+            });
+        }).start();
     }
 
     private void loadCurrentLocation() {
-        cityName.setText("Locating...");
+        System.out.println("\n [Doxing you]");
+        if (Location != null) Location.setText("Finding your location...");
 
         new Thread(() -> {
-            // Grab our array: [status, city, state, lat, lon]
             String[] locData = IpApiClient.getLocation();
 
             Platform.runLater(() -> {
                 if (locData != null) {
-                    // Update our variables using the array slots
-                    currentLocationName = locData[1] + ", " + locData[2]; // City, State
-                    currentLat = Double.parseDouble(locData[3]);          // Lat
-                    currentLon = Double.parseDouble(locData[4]);          // Lon
-                } else {
-                    System.out.println("Location failed, defaulting to previous coordinates.");
-                }
+                    currentLocationName = locData[1] + ", " + locData[2];
+                    currentLat = Double.parseDouble(locData[3]);
+                    currentLon = Double.parseDouble(locData[4]);
+                    System.out.println("[We're in] IP located at: " + currentLocationName);
+                    System.out.println("   => IP STARTUP LAT: " + currentLat);
+                    System.out.println("   => IP STARTUP LON: " + currentLon);
 
-                // Fetch the weather using the new coordinates
+
+                } else {
+                    System.out.println("[Failed Dox] IP Location failed, defaulting to Chicago.");
+                }
                 loadWeather(currentLat, currentLon, currentLocationName);
             });
         }).start();
     }
 
+    //Grabs the weather and passes the search to the geocodingclient api which then passes it to the nws api
     private void loadWeather(double lat, double lon, String name) {
+        if (Location != null) Location.setText("Reading the clouds...");
+
+        lat = Math.round(lat * 10000.0) / 10000.0;
+        lon = Math.round(lon * 10000.0) / 10000.0;
+
+        final double finalLat = lat;
+        final double finalLon = lon;
+        //nws doesnt play nice with long digits after the decimal. must be capped in order to work
+
+
         new Thread(() -> {
-            // Fetch data in the background so the UI doesn't freeze
-            WeatherResult result = NWSClient.getWeather(lat, lon);
+            System.out.println("4. [Trying to grab weather] NWS API -> Lat: " + finalLat + ", Lon: " + finalLon);
+            WeatherResult result = NWSClient.getWeather(finalLat, finalLon);
 
             Platform.runLater(() -> {
                 if (result != null) {
+                    System.out.println("5. [Very Good] We read the sky! Updating frontend.");
                     currentWeather = result;
                     currentLocationName = name;
                     updateDisplay();
                 } else {
-                    cityName.setText("Failed to load weather.");
+                    System.out.println("5. [Very bad] NWS API issue.");
+                    if (Location != null) Location.setText("Couldn't retrieve weather.");
                 }
             });
         }).start();
     }
 
-    private void updateDisplay() {
-        // 1. Update the main city label
-        cityName.setText(currentLocationName);
+    // Parses through shared names from the nws's naming convention and grabs the locally stored icons with the highest match based on
 
-        // 2. Clear the hourly scroll box and fill it with new data
-        hourlyHBox.getChildren().clear();
+    private String getLocalIconPath(Period p) {
+        String forecast = p.shortForecast.toLowerCase();
+        boolean isDay = p.isDaytime;
+        String fileName = isDay ? "Sunny.png" : "Clear-night.png";
 
-        // Populate Hourly Data
-        if (currentWeather != null && currentWeather.hourly != null) {
-            for (int i = 0; i < Math.min(12, currentWeather.hourly.size()); i++) {
-                Period hour = currentWeather.hourly.get(i);
+        if (forecast.contains("thunderstorm")) {
+            fileName = forecast.contains("severe") ? "Severe-thunderstorm.png" : "Scattered-thunderstorm.png";
+        } else if (forecast.contains("blizzard")) {
+            fileName = "Blizzard.png";
+        } else if (forecast.contains("snow")) {
+            fileName = "Snow.png";
+        } else if (forecast.contains("rain") || forecast.contains("showers")) {
+            if (forecast.contains("heavy")) {
+                fileName = "Heavy-rain.png";
+            } else if (forecast.contains("scattered")) {
+                fileName = isDay ? "Scattered-showers.png" : "Scattered-showers-night.png";
+            } else {
+                fileName = isDay ? "Rain.png" : "Rain-night.png";
+            }
+        } else if (forecast.contains("cloudy") || forecast.contains("overcast")) {
+            if (forecast.contains("partly") || forecast.contains("mostly")) {
+                fileName = isDay ? "Partly-cloudy.png" : "Partly-cloudy-night.png";
+            } else {
+                fileName = "Cloudy.png";
+            }
+        } else if (forecast.contains("fog")) {
+            fileName = "Fog.png";
+        } else if (forecast.contains("wind")) {
+            fileName = "Wind.png";
+        } else if (forecast.contains("drizzle")) {
+            fileName = isDay ? "Drizzle.png" : "Drizzle-night.png";
+        }
 
-                // Create the individual card background
-                VBox hourCard = new VBox(8);
-                hourCard.setStyle("-fx-background-color: #1E1E27; -fx-padding: 10; -fx-background-radius: 8; -fx-alignment: center; -fx-min-width: 60; -fx-pref-height: 75;");
+        java.net.URL resource = getClass().getResource("/images/WeatherIcons/" + fileName);
+        if (resource == null) {
+            System.out.println("[WARN] Icon not found: " + fileName + " - using default.");
+            String fallback = isDay ? "Sunny.png" : "Clear-night.png";
+            resource = getClass().getResource("/images/WeatherIcons/" + fallback);
+        }
+        return resource.toExternalForm();
+    }
 
-                // Format Time Label (e.g., "3 PM")
-                String timeStr = new java.text.SimpleDateFormat("h a").format(hour.startTime);
-                Label timeLabel = new Label(timeStr);
-                timeLabel.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 14px;");
+    //
+    // Grabs the hi and lo temps using the day period
+    // Only scans the first two since we need to only grab todays day and night temps
 
-                // Format Temp Label (e.g., "72°")
-                Label tempLabel = new Label(hour.temperature + "°");
-                tempLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
+    private int[] getHiLo() {
+        int hi = Integer.MIN_VALUE;
+        int lo = Integer.MAX_VALUE;
 
-                // Add both labels to the card, and the card to the scroll row
-                hourCard.getChildren().addAll(timeLabel, tempLabel);
-                hourlyHBox.getChildren().add(hourCard);
+        if (currentWeather.forecast != null) {
+            int checked = 0;
+            for (Period p : currentWeather.forecast) {
+                if (checked >= 2) {
+                    break;
+                }
+                if (p.isDaytime  && hi == Integer.MIN_VALUE) {
+                    hi = p.temperature;
+                };
+                if (!p.isDaytime && lo == Integer.MAX_VALUE) {
+                    lo = p.temperature;
+                };
+                checked++;
             }
         }
 
-        // --- 3. Populate 7-Day Forecast Data ---
-        dailyHBox.getChildren().clear();
+        if (hi == Integer.MIN_VALUE) hi = lo;  // edge case when its late and todays day is no longer being brought in by the nws api
+        if (lo == Integer.MAX_VALUE) lo = hi;
 
-        if (currentWeather != null && currentWeather.forecast != null) {
-            for (int i = 0; i < currentWeather.forecast.size(); i++) {
-                Period currentPeriod = currentWeather.forecast.get(i);
+        return new int[]{hi, lo};
+    }
 
-                // We only want to create a card for the Daytime periods
-                if (currentPeriod.isDaytime) {
+    // update logic
 
-                    // Create the Daily Card
-                    VBox dayCard = new VBox(5);
-                    dayCard.setStyle("-fx-background-color: #000000; -fx-background-radius: 10; -fx-alignment: center; -fx-min-width: 120; -fx-pref-height: 190;");
+    private void updateDisplay() {
+        if (currentWeather == null || currentWeather.hourly == null || currentWeather.hourly.isEmpty()) return;
 
-                    // 1. Day Name (Convert "Monday" to "Mon")
-                    String dayName = currentPeriod.name;
-                    if (dayName.length() > 3 && !dayName.equals("Today")) {
-                        dayName = dayName.substring(0, 3);
-                    }
-                    Label dayLabel = new Label(dayName);
-                    dayLabel.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 16px;");
+        Period current = currentWeather.hourly.get(0);
 
-                    // 2. Weather Icon (Temporary magnifying glass)
-                    ImageView icon = new ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/searchIcon.png")));
-                    icon.setFitHeight(48);
-                    icon.setFitWidth(48);
+        // Main icon
+        if (CurrentIcon != null) {
+            CurrentIcon.setImage(new javafx.scene.image.Image(getLocalIconPath(current)));
+        }
 
-                    // 3. High / Low Temperature
-                    String highLow = currentPeriod.temperature + "°";
+        // Location + current temp
+        if (Location != null)    Location.setText(currentLocationName);
+        if (CurrentTemp != null) CurrentTemp.setText("Current temp: " + current.temperature + "°");
 
-                    // Check if there is a "Night" period right after this one to get the Low Temp
-                    if (i + 1 < currentWeather.forecast.size()) {
-                        Period nightPeriod = currentWeather.forecast.get(i + 1);
-                        highLow += " / " + nightPeriod.temperature + "°";
-                    }
+        // Hi / Lo  (from daily forecast endpoint)
+        int[] hiLo = getHiLo();
+        if (DailyHIgh != null) DailyHIgh.setText("High: " + hiLo[0] + "°");
+        if (DailyLow != null) DailyLow.setText(" Low: "  + hiLo[1] + "°");
 
-                    Label tempLabel = new Label(highLow);
-                    tempLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
+        // Wind speed + direction
+        // windSpeed is already a formatted string from NWS, e.g. "12 mph" or "5 to 10 mph"
+        if (CurrentWindSpeed != null) CurrentWindSpeed.setText( current.windSpeed != null ? "Current wind: " + current.windSpeed     : "-");
+        if (CurrentWindDirection != null) CurrentWindDirection.setText(current.windDirection != null ? "Wind Direction: " + current.windDirection : "-");
 
-                    // Add everything to the card, and add the card to the scroll box
-                    dayCard.getChildren().addAll(dayLabel, icon, tempLabel);
-                    dailyHBox.getChildren().add(dayCard);
+        if (ChanceOfPercipitation != null) {
+            int chance = 0;
+            if (current.probabilityOfPrecipitation != null) {
+                chance = current.probabilityOfPrecipitation.value;
+            }
+            ChanceOfPercipitation.setText(chance + "%");
+        }
+
+        // Hourly scroll
+        if (hourlyHBox != null) {
+            List<Node> panels = hourlyHBox.getChildren();
+
+            for (int i = 0; i < Math.min(panels.size(), currentWeather.hourly.size()); i++) {
+                if (!(panels.get(i) instanceof VBox)) continue;
+
+                VBox panel = (VBox) panels.get(i);
+                Period hourData = currentWeather.hourly.get(i);
+                List<Node> cardChildren = panel.getChildren();
+
+                if (cardChildren.size() < 3) continue;
+
+                // Icon
+                if (cardChildren.get(0) instanceof ImageView) {
+                    ((ImageView) cardChildren.get(0))
+                            .setImage(new javafx.scene.image.Image(getLocalIconPath(hourData)));
+                }
+
+                // Temp
+                if (cardChildren.get(1) instanceof Text) {
+                    ((Text) cardChildren.get(1)).setText(hourData.temperature + "°");
+                }
+
+                // Time
+                if (cardChildren.get(2) instanceof Text) {
+                    String timeStr = new java.text.SimpleDateFormat("h a").format(hourData.startTime);
+                    ((Text) cardChildren.get(2)).setText(timeStr);
                 }
             }
+            System.out.println("6. [ITS WORKING] Hourly panels set.");
+        }
+    }
+
+    private void swapToMultiView(ActionEvent event) {
+        if (currentWeather == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Multiview.fxml"));
+            Parent forecastRoot = loader.load();
+
+            // Pass weather data to MultiViewController BEFORE showing the scene
+            MultiViewController multiController = loader.getController();
+            multiController.initData(currentWeather, currentLocationName);
+
+            Scene forecastScene = new Scene(forecastRoot, 1280, 720);
+            forecastScene.getStylesheets().add(getClass().getResource("/CSS/global.css").toExternalForm());
+
+            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            window.setScene(forecastScene);
+            window.show();
+        } catch (IOException e) {
+            System.out.println("Error loading forecast scene: " + e.getMessage());
         }
     }
 }

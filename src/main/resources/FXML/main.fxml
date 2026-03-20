@@ -1,121 +1,826 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.image.ImageView?>
+
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 
-<VBox fx:id="root" prefHeight="720" prefWidth="1280"
-           xmlns="http://javafx.com/javafx/17.0.12"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="MainController" style="-fx-background-color: #1E1E27;" spacing="20">
-    <padding>
-        <Insets top="30" right="150" left="150" bottom="10"/>
-    </padding>
-
-
-    <VBox spacing="30">
-    </VBox>
-
-    <HBox alignment="CENTER">
-        <TextField
-            fx:id = "searchBar"
-            prefWidth="600" prefHeight="50"
-            promptText= "Enter a city (Ex: Chicago)"
-            style = "-fx-background-color: blue"
-        />
-        <Button fx:id="currentLocation" prefHeight="40" prefWidth="40" style = "-fx-background-color: green">
-            <graphic>
-                <ImageView fitHeight="24" fitWidth="24">
-                    <Image url="@/images/currentLocationIcon.png"/>
-                </ImageView>
-            </graphic>
-        </Button>
-        <Button fx:id="search" prefHeight="40" prefWidth="40" style = "-fx-background-color: green">
-            <graphic>
-                <ImageView fitHeight="24" fitWidth="24">
-                    <Image url="@/images/searchIcon.png"/>
-                </ImageView>
-            </graphic>
-        </Button>
-    </HBox>
-
-    <HBox spacing="10" prefHeight="350" style = "-fx-background-radius: 10">
-
-        <VBox spacing="35" prefWidth="440" style="-fx-background-color: #000000; -fx-background-radius: 10;">
-
-            <padding>
-                <Insets top="10" right="10" bottom="0" left="10"/>
-            </padding>
-
-            <HBox>
-                <Label fx:id="cityName" alignment="TOP_LEFT"/>
-
-                <Label text="test" alignment="TOP_RIGHT"/>
+<VBox fx:controller="MainController" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #1E1E27;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER" prefHeight="57.0" prefWidth="1280.0" >
+         <children>
+            <TextField fx:id="Search" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="426.0" promptText="Enter a city (Ex: Chicago)" style="-fx-background-color: transparent;">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </TextField>
+            <HBox alignment="CENTER" prefHeight="57.0" prefWidth="125.0" spacing="10.0">
+               <children>
+                  <Button fx:id="GrabCurrentLocation" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: green;" text="Button">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/currentLocationIcon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="SearchGO" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="Button">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/searchIcon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
             </HBox>
-
-            <HBox>
-                <ImageView fx:id="mainWeatherIcon" fitHeight="96" fitWidth="96" preserveRatio="true">
-                    <Image url="@/images/searchIcon.png"/>
-                </ImageView>
-                <VBox>
-                    <Label text="test"/>
-                    <Label text="test"/>
-                    <Label text="test"/>
-                </VBox>
-            </HBox>
-
-
-            <VBox spacing="10">
-            <Label text="Hourly:" />
-
-
-            <ScrollPane fitToHeight= "true" vbarPolicy="NEVER" hbarPolicy="ALWAYS" prefHeight="100" style="-fx-background-color: #000000" >
-                <HBox fx:id="hourlyHBox" spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #000000"/>
-            </ScrollPane>
+         </children>
+         <VBox.margin>
+            <Insets bottom="25.0" top="10.0" />
+         </VBox.margin>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <VBox fx:id="CurrentWeather" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="588.0" prefWidth="1095.0" style="-fx-background-color: #343348;">
+               <children>
+                  <VBox prefHeight="261.0" prefWidth="1034.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="85.0" prefWidth="1187.0">
+                           <children>
+                              <Text fx:id="Location" strokeType="OUTSIDE" strokeWidth="0.0" text="New York City, New York" wrappingWidth="915.767578125">
+                                 <font>
+                                    <Font size="50.0" />
+                                 </font>
+                              </Text>
+                              <Button fx:id="MultidayScene" mnemonicParsing="false" prefHeight="70.0" prefWidth="184.0" text="Multiday View" style="-fx-background-color: #B2D4F7;">
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" right="20.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <opaqueInsets>
+                              <Insets bottom="150.0" />
+                           </opaqueInsets>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0" spacing="50">
+                           <children>
+                              <ImageView fx:id="CurrentIcon" fitHeight="256.0" fitWidth="256.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../images/WeatherIcons/Sunny.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets right="25.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <VBox alignment="CENTER" prefHeight="220.0" prefWidth="256.0">
+                                 <children>
+                                    <Text fx:id="CurrentTemp" strokeType="OUTSIDE" strokeWidth="0.0" text="Current Temp">
+                                       <font>
+                                          <Font size="38.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="DailyHIgh" strokeType="OUTSIDE" strokeWidth="0.0" text="Hi/Lo:">
+                                       <font>
+                                          <Font size="38.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="DailyLow" strokeType="OUTSIDE" strokeWidth="0.0" text="Hi/Lo:">
+                                       <font>
+                                          <Font size="38.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </VBox>
+                              <VBox alignment="CENTER" prefHeight="220.0" prefWidth="256.0">
+                                 <children>
+                                    <Text fx:id="CurrentWindSpeed" strokeType="OUTSIDE" strokeWidth="0.0" text="Wind Speed">
+                                       <font>
+                                          <Font size="38.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="CurrentWindDirection" strokeType="OUTSIDE" strokeWidth="0.0" text="Wind Direction">
+                                       <font>
+                                          <Font size="38.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="ChanceOfPercipitation" strokeType="OUTSIDE" strokeWidth="0.0" text="\%Percipitation">
+                                       <font>
+                                          <Font size="38.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Text fx:id="Hourly" strokeType="OUTSIDE" strokeWidth="0.0" text="Hourly:" wrappingWidth="118.80859375">
+                           <font>
+                              <Font size="40.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </HBox>
+                  <ScrollPane hbarPolicy="ALWAYS" prefHeight="228.0" prefWidth="1095.0" style="-fx-background-color: transparent; -fx-background: transparent;" vbarPolicy="NEVER">
+                     <content>
+                        <HBox fx:id="hourlyHBox" alignment="CENTER_LEFT" prefHeight="137.0" prefWidth="133.0" spacing="25.0">
+                           <children>
+                              <VBox fx:id="time1" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Wind.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time2" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time01" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time3" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time011" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time4" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time012" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time5" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time013" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time6" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time014" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time7" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time015" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time8" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time016" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time9" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time017" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time10" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time018" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time11" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time019" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time12" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0110" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time13" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0111" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time14" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0112" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time15" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0113" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time16" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0114" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time17" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0115" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time18" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0116" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time19" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0117" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time20" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0118" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time21" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0119" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time22" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0120" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time23" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0121" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                              <VBox fx:id="time24" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="167.0" style="-fx-background-color: transparent;">
+                                 <children>
+                                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/WeatherIcons/Sunny.png" />
+                                       </image>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </ImageView>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Temp">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                    </Text>
+                                    <Text fx:id="time0122" strokeType="OUTSIDE" strokeWidth="0.0" text="Time">
+                                       <VBox.margin>
+                                          <Insets bottom="15.0" top="15.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets left="20.0" right="20.0" />
+                           </padding>
+                        </HBox>
+                     </content>
+                  </ScrollPane>
+               </children>
             </VBox>
-
-        </VBox>
-
-        <StackPane HBox.hgrow="ALWAYS" style="-fx-background-color: #000000; -fx-background-radius: 10;">
-            <Label text="Radar Map Feed" style="-fx-text-fill: #555555; -fx-font-size: 24px;" />
-
-            <Canvas fx:id="radarCanvas" width="450" height="350" />
-        </StackPane>
-
-    </HBox>
-    <VBox spacing="50">
-    </VBox>
-
-    <HBox spacing="15">
-
-        <VBox spacing="10" VBox.vgrow="ALWAYS">
-
-            <Label text="7-Day Forecast:" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
-
-            <HBox fx:id="dailyHBox" spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: transparent;" prefHeight="150">
-
-                <VBox prefWidth="120" prefHeight="150" style="-fx-background-color: #000000; -fx-background-radius: 10; -fx-alignment: center;">
-                    <Label text="Mon" style="-fx-text-fill: #b3b3b3; -fx-font-size: 16px;"/>
-                    <ImageView fitHeight="48" fitWidth="48">
-                        <Image url="@/images/searchIcon.png"/>
-                    </ImageView>
-                    <Label text="55° / 40°" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-                </VBox>
-
-            </HBox>
-
-        </VBox>
-
-
-
-    </HBox>
-
+         </children>
+      </HBox>
+   </children>
+   <opaqueInsets>
+      <Insets bottom="150.0" left="10.0" right="150.0" top="30.0" />
+   </opaqueInsets>
 </VBox>
